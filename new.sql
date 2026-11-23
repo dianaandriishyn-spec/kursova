@@ -357,7 +357,7 @@ CREATE TABLE Promotions (                                                       
 		-- CONSTRAINT fk_promo_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)  ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
-CREATE TABLE Store_hours (                   -- «ГРАФІК РОБОТИ» магазину в меню (1 = Пн ... 7 = Нд)
+CREATE TABLE Store_hours (                   
     weekday INT  NOT NULL PRIMARY KEY,
     open_time TIME NOT NULL,
     close_time TIME NOT NULL,
@@ -416,26 +416,37 @@ CREATE TABLE purchase_items (                                                   
 		CONSTRAINT fk_pi_size     FOREIGN KEY (size_id)     REFERENCES Shop_storage(size)          ON DELETE RESTRICT ON UPDATE CASCADE
 )
 
-insert into Shop_storage(
-	barcode ,category, brand_name, human, color, size, amount, price , status )
-values
-	(1234567891234, 'Шорти', 'Zara', 'Man', 'red', 'S', 5, 300.50,'Новий'),
-    (1234567892341, 'Плаття', 'Bershka', 'Woman', 'green', 'XS', 10, 299.90, 'Акційний')
+insert into Shop_storage(barcode ,category, brand_name_id, human, color, size, amount, price ,cost_price, status, added_at ) values
+	(2049763927100, 'Штани', 'Bershka', 'Чоловічий', 'Чорний', 'M', 20, 799.00,'Акційний'),
+    (2057830282225, 'Футболка', 'Nike', 'Жіночий', 'Розовий', 'S', 12, 799.00, 'Акційний'),
+    (2615493293404, 'Кофта', 'Lacoste', 'Жіночий', 'Розовий', 'S', 12, 799.00, 'Акційний'),
+    (6583729038372, 'Піджак', 'Zara', 'Чоловічий', 'Коричневий', 'L', 5, 1599.00, 'Новий'),
+    (8649372947362, 'Плаття', 'Bershka', 'Жіночий', 'Червоний', 'XS', 11, 699.00, 'Акційний'),
+    (6749274927648, 'Светр', 'Oysho', 'Чоловічий', 'Зелений', 'XS', 7, 999.00, 'Акційний'),
+    (6342840264842, 'Шорти', 'Zara', 'Чоловічий', 'Синій', 'S', 4, 1399.00, 'Акційний'),
+    (2163926490472, 'Сорочка', 'Massimo Dutti', 'Білий', 'Розовий', 'XL', 13, 1299.00, 'Акційний'),
+    (1478394726483, 'Спідниця', 'Stradivarius', 'Жіночий', 'Голубий', 'XXS', 2, 999.00, 'Новий'),
+    (9262745274932, 'Куртка', 'Stradivarius', 'Чоловічий', 'Чорний', 'M', 6, 1799.00, 'Новий'),
+    (0267647641552, 'Блузка', 'Zara', 'Жіночий', 'Чорний', 'M', 1, 599.00, 'Продано'),
+    (6785674534587, 'Кофта', 'Massimo Dutti', 'Чоловічий', 'Сірий', 'L', 2, 1899.00, 'Продано'),
+    (1321321432546, 'Светр', 'Bershka', 'Жіночий', 'Розовий', 'S', 3, 799.00, 'Продано'
 );
 
-insert into Cash_register(
-	barcode ,category, brand_name, human, color, size, amount, price , status, totaL_amount ,  discount, total_discount, card, discount_existence, total_cost )
-values(
-	1234567891234, 'Шорти', 'Zara', 'Man', 'red', 'S', 5, 300.50,'Новий', 1,2,3, 'Присутня', 'Немає', 1.1
-);
-show tables;
-SELECT * FROM Shop_storage;
+
+INSERT INTO Cash_register (
+    barcode_id,
+    brand_name_id,
+    amount_id,
+    discount,
+    card,
+    discount_existence
+) VALUES
+    ('2057830282225','Nike', 1 , 15 , 'Присутня', 'Є'),
+    ('1478394726483','Stradivarius', 1, 15, 'Присутня', 'Є');
 
 
 
 
--- МЕНЮШКА КАСИРА
-USE new_shop;
 
 
 
