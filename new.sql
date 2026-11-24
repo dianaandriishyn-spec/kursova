@@ -1,19 +1,35 @@
 CREATE DATABASE new_shop;
 USE new_shop;
 
+create table Suppliers(                                                                                     -- ПОСТАЧАЛЬНИКИ     
+	number int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    supplier_last_name VARCHAR(50),   -- Прізвище
+    supplier_first_name VARCHAR(50),  -- Ім'я
+    supplier_middle_name VARCHAR(50), -- По-батькові
+    brand_name varchar(50) UNIQUE,
+               -- name_company varchar(15),
+    supplier_phone char(13),
+    supplier_gmail varchar(50),
+    country varchar(15),
+    supplier_start_work date,
+    supplier_salary DECIMAL(10,2) NOT NULL,
+    
+		CONSTRAINT chk_suppliers_salary CHECK (supplier_salary >= 0)
+);
+
 create table Shop_storage(                                                                                  -- СКЛАД
 	product_id int NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     barcode char(13) UNIQUE,
     category ENUM('Шорти', 'Спідниця', 'Штани', 'Футболка', 'Светр','Блузка','Кофта','Сорочка','Піджак', 'Куртка', 'Плаття'),
     brand_name_id varchar(50),
-    human ENUM ('Man', 'Woman'),
-    color ENUM ('red', 'orange', 'yellow', 'green','blue', 'violet', 'grey', 'black'),
+    human ENUM ('Чоловічий', 'Жіночий'),
+    color ENUM ('Червоний', 'Оранжевий', 'Жовтий', 'Зелений','Голубий', 'Синій', 'Розовий', 'Сірий', 'Чорний', 'Білий', 'Коричневий'),
     size ENUM ('XXS', 'XS', 'S', 'M', 'L', 'XL'),
     amount int,
     price DECIMAL(10,2) NOT NULL,
     cost_price DECIMAL(10,2) NOT NULL,            
     status ENUM ('Акційний', 'Новий', 'Продано'),
-    added_at DATETIME DEFAULT CURRENT_TIMESTAMP,  -- для статусу «Новий»
+    added_at DATETIME DEFAULT CURRENT_TIMESTAMP,  
 		
         CONSTRAINT fk_storage_brand
 		FOREIGN KEY (brand_name_id) REFERENCES Suppliers(brand_name)
@@ -34,7 +50,7 @@ CREATE TABLE Roles (                                                     -- пр
 create table Positions (                                                                                      -- ПОСАДА 
     position_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     position_name VARCHAR(40) NOT NULL UNIQUE,
-    role_id INT NOT NULL,     -- яка роль у системі відповідає посаді
+    role_id INT NOT NULL,     
     
 		CONSTRAINT fk_positions_role
         FOREIGN KEY (role_id) REFERENCES roles(role_id)
@@ -47,10 +63,9 @@ create table Workers(                                                           
     worker_first_name VARCHAR(50) NOT NULL,  -- Ім'я
     worker_middle_name VARCHAR(50) NOT NULL, -- По-батькові
     position_id int,
-    worker_login varchar(50) NOT NULL UNIQUE,
-    worker_password VARCHAR(255) NOT NULL,
     worker_phone char(13),
     worker_gmail varchar(50),
+    worker_address VARCHAR(150) NULL,
     worker_start_work date,
     worker_finish_work date,
     worker_salary DECIMAL(10,2) NOT NULL, 
@@ -66,39 +81,14 @@ create table Workers(                                                           
 
 CREATE TABLE Accounts (                                                                                     -- вхід у систему (Е1)
     account_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    worker_id INT NOT NULL UNIQUE,         -- 1 працівник = 1 акаунт
+    worker_id INT NOT NULL UNIQUE,        
     login VARCHAR(50) NOT NULL UNIQUE,         
     password VARCHAR(255) NOT NULL,                
     is_active BOOLEAN NOT NULL DEFAULT TRUE,  
     
 		CONSTRAINT fk_accounts_worker
         FOREIGN KEY (worker_id) REFERENCES 	Workers(worker_id)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-        
-        CONSTRAINT fk_worker_password 
-        FOREIGN KEY (password) REFERENCES Workers(worker_password)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
-        
-        CONSTRAINT fk_worker_login 
-        FOREIGN KEY (login) REFERENCES Workers(worker_login)
         ON DELETE RESTRICT ON UPDATE CASCADE
-        
-);
-
-create table Suppliers(                                                                                     -- ПОСТАЧАЛЬНИКИ     
-	number int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    supplier_last_name VARCHAR(50),   -- Прізвище
-    supplier_first_name VARCHAR(50),  -- Ім'я
-    supplier_middle_name VARCHAR(50), -- По-батькові
-    brand_name varchar(50) UNIQUE,
-               -- name_company varchar(15),
-    supplier_phone char(13),
-    supplier_gmail varchar(50),
-    country varchar(15),
-    supplier_start_work date,
-    supplier_salary DECIMAL(10,2) NOT NULL,
-    
-		CONSTRAINT chk_suppliers_salary CHECK (supplier_salary >= 0)
 );
 
 create table Product_return(                                                                                -- ЗАЯВА НА ПОВЕРНЕННЯ ТОВАРУ
@@ -112,7 +102,7 @@ create table Product_return(                                                    
     number_passport CHAR(9) NOT NULL,
     phone char(13) NOT NULL,
     description_return VARCHAR(100) NOT NULL,
-    admin_name VARCHAR(50) DEFAULT 'Андріїшин Діана'NOT NULL,
+    admin_name VARCHAR(50) DEFAULT 'Андріїшин Діана Василівна' NOT NULL,
     cost DECIMAL(10,2) NOT NULL,                                                                 -- прив'язка до чеку
     cost_date DATETIME UNIQUE,                                                              -- прив'язка до чеку 
     return_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ,
@@ -137,19 +127,19 @@ CREATE TABLE Cash_register (                                                    
     barcode_id char(13),
     category_id ENUM('Шорти', 'Спідниця', 'Штани', 'Футболка', 'Светр','Блузка','Кофта','Сорочка','Піджак', 'Куртка', 'Плаття'),
 	brand_name_id varchar(50),
-    human_id ENUM ('Man', 'Woman'),
-    color_id ENUM ('red', 'orange', 'yellow', 'green','blue', 'violet', 'grey', 'black'),
+    human_id ENUM ('Чоловічий', 'Жіночий'),
+    color_id ENUM ('Червоний', 'Оранжевий', 'Жовтий', 'Зелений','Голубий', 'Синій', 'Розовий', 'Сірий', 'Чорний', 'Білий', 'Коричневий'),
     size_id ENUM ('XXS', 'XS', 'S', 'M', 'L', 'XL'),
     amount_id int,                                         -- кількість позицій одного виду
-    price_id double,                                       -- ціна за одну позицію одного виду(без знижки)
-    new_price double,                                      -- "Сума" у менюшці (ціна зі знижкою за 1 товар)
+    price_id DECIMAL(10,2),                                       -- ціна за одну позицію одного виду(без знижки)
+    new_price DECIMAL(10,2),                                      -- "Сума" 
     status_id ENUM ('Акційний', 'Новий', 'Продано'),
     total_amount int,                                      -- загальна кількість позицій
     discount int,                                          -- знижка(у відсотках)
-    total_discount double,                                    -- знижка(у гривнях, з  мінусом мб)
+    total_discount DECIMAL(10,2),                                    -- знижка(у гривнях, з  мінусом мб)
     card ENUM ('Присутня','Немає'),                        -- є/нема картки на знижку
     discount_existence ENUM ('Є','Немає'),                 -- є/нема знижки
-    total_cost double,                                     -- загальна сума (з знижкою)
+    total_cost DECIMAL(10,2),                                     -- загальна сума (з знижкою)
         
 		CONSTRAINT fk_cash_barcode
         FOREIGN KEY (barcode_id) REFERENCES Shop_storage(barcode)
@@ -162,87 +152,61 @@ CREATE TABLE Cash_register (                                                    
         -- CONSTRAINT fk_cash_brand
         -- FOREIGN KEY (brand_name_id) REFERENCES Shop_storage(brand_name_id)
         -- ON DELETE RESTRICT ON UPDATE CASCADE
-        
-		-- FOREIGN KEY (barcode_id) REFERENCES Shop_storage(barcode)  ON DELETE RESTRICT ON UPDATE CASCADE,
-		-- FOREIGN KEY (category_id) REFERENCES Shop_storage(category)  ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (brand_name_id) REFERENCES Suppliers(brand_name) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (brand_name_id) REFERENCES Shop_storage(brand_name)  ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (human_id) REFERENCES Shop_storage(human)  ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (color_id) REFERENCES Shop_storage(color)  ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (size_id) REFERENCES Shop_storage(size)  ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (amount_id) REFERENCES Shop_storage(amount)  ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (price_id) REFERENCES Shop_storage(price)  ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (status_id) REFERENCES Shop_storage(status)  ON DELETE RESTRICT ON UPDATE CASCADE 
 );
 
 CREATE TABLE Сash_register_receipt (                                                                        -- ЧЕК
     receipt_number INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     sale_date DATETIME DEFAULT CURRENT_TIMESTAMP,  
-    barcode_id char(13) UNIQUE,
-    category_id VARCHAR(50),
-    brand_name_id VARCHAR(50),
-    human_id ENUM ('Man', 'Woman'),
-    size_id VARCHAR(50),
-	price_id double,                                            -- ціна за одну позицію одного виду(без знижки)
-	discount_id int,                                            -- знижка(у відсотках)
-    new_price_id double,                                        -- ціна зі знижкою за 1 товар
+    -- barcode_id char(13) UNIQUE,
+    -- category_id VARCHAR(50),
+    -- brand_name_id VARCHAR(50),
+    -- human_id ENUM ('Man', 'Woman'),
+    -- size_id VARCHAR(50),
+	-- price_id double,                                            -- ціна за одну позицію одного виду(без знижки)
+	-- discount_id int,                                            -- знижка(у відсотках)
+    -- new_price_id double,                                        -- ціна зі знижкою за 1 товар
     total_cost_id DOUBLE NOT NULL,                              -- загальна сума (з знижкою)
-	amount_id int,
-    total_amount_id int,
-    payment_method ENUM('Готівка', 'Картка') NULL, 
-    discount_card BOOLEAN NOT NULL DEFAULT FALSE,               -- «Карта на знижку: присутня / немає»
+	-- amount_id int,
+    total_amount_id int not null,
+    payment_method ENUM('Готівка', 'Картка') DEFAULT "Готівка" NULL, 
+    discount_card ENUM("Пристуня","Немає") NOT NULL DEFAULT "Немає",               -- «Карта на знижку: присутня / немає»
     worker_id INT NOT NULL,                 
     
-		CONSTRAINT fk_receipt_number
-        FOREIGN KEY (receipt_number) REFERENCES Cash_register(number)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
+		-- CONSTRAINT fk_receipt_number
+        -- FOREIGN KEY (receipt_number) REFERENCES Cash_register(number)
+        -- ON DELETE RESTRICT ON UPDATE CASCADE,
     
-		CONSTRAINT fk_receipt_brand
-        FOREIGN KEY (brand_name_id) REFERENCES Suppliers(brand_name)
-        ON DELETE RESTRICT ON UPDATE CASCADE,
+		-- CONSTRAINT fk_receipt_brand
+        -- FOREIGN KEY (brand_name_id) REFERENCES Suppliers(brand_name)
+        -- ON DELETE RESTRICT ON UPDATE CASCADE,
         
 		CONSTRAINT fk_receipt_worker
         FOREIGN KEY (worker_id) REFERENCES Workers(number)
         ON DELETE RESTRICT ON UPDATE CASCADE
         
-		-- FOREIGN KEY (category_id) REFERENCES Cash_register(category) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (brand_name_id) REFERENCES Suppliers(brand_name) ON DELETE RESTRICT ON UPDATE CASCADE,
-		    -- FOREIGN KEY (brand_name_id) REFERENCES Cash_register(brand_name) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (human_id) REFERENCES Cash_register(human) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (size_id) REFERENCES Cash_register(size) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (discount_id) REFERENCES Cash_register(discount) ON DELETE RESTRICT ON UPDATE CASCADE,
-		-- FOREIGN KEY (new_price_id) REFERENCES Cash_register(new_price) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (total_cost_id) REFERENCES Cash_register(total_cost) ON DELETE RESTRICT ON UPDATE CASCADE,
-		-- FOREIGN KEY (amount_id) REFERENCES Cash_register(amount) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (price_id) REFERENCES Cash_register(price) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (totaL_amount_id) REFERENCES Cash_register(totaL_amount) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (worker_last_name_id)  REFERENCES Workers(worker_last_name) ON DELETE RESTRICT ON UPDATE CASCADE,
-        -- FOREIGN KEY (worker_first_name_id) REFERENCES Workers(worker_first_name) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE History_receipts (                                                                             -- ІСТОРІЯ ЧЕКІВ
 	receipt_number_id INT NOT NULL,
     sale_date_id DATETIME DEFAULT CURRENT_TIMESTAMP,
-    total_cost_id DOUBLE NOT NULL,                               -- загальна сума (з знижкою)
+    total_cost_id DECIMAL(10,2) NOT NULL,                               -- загальна сума (з знижкою)
     status_product ENUM("Оплачено", "Повернено") DEFAULT "Оплачено",
     -- КНОПКА "ПЕРЕГЛЯНУТИ":
-    worker_last_name_id VARCHAR(50) NOT NULL,                 
-	worker_first_name_id VARCHAR(50) NOT NULL,
-    worker_middle_name_id VARCHAR(50), 
+    worker_id INT NOT NULL,
 	payment_method_id ENUM('Готівка', 'Картка') NOT NULL,
 	number int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     product_id int NOT NULL,
     barcode_id char(13), -- каса
     category_id VARCHAR(50), -- чек
 	brand_name_id VARCHAR(50), -- чек
-	human_id ENUM ('Man', 'Woman'), -- чек
+	human_id ENUM ('Чоловічий', 'Жіночий'), -- чек
     size_id VARCHAR(50), -- чек
     amount_id int,
     price_id DECIMAL(10,2) NOT NULL,                                    -- ціна за одну позицію одного виду
 	new_price_id DECIMAL(10,2) NOT NULL,                                -- ціна зі знижкою за 1 товар
     
 		-- «Сума» у чеку = (ціна - знижка) * кількість; бізнес-правило 12
-		line_total DECIMAL(10,2) GENERATED ALWAYS AS (ROUND(amount_id * (price_id - new_price_id), 2)) STORED,
+		line_total DECIMAL(12,2) GENERATED ALWAYS AS (ROUND(amount_id * new_price_id, 2)) STORED,
     
 		CONSTRAINT uq_receipt_product UNIQUE (receipt_number_id, product_id),
 		CONSTRAINT chk_item_amount CHECK (amount > 0),
@@ -259,6 +223,10 @@ CREATE TABLE History_receipts (                                                 
         
 		CONSTRAINT fk_history_brand
         FOREIGN KEY (brand_name_id) REFERENCES Suppliers(brand_name)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+        
+        CONSTRAINT fk_worker_id
+        FOREIGN KEY (worker_id) REFERENCES Workers(worker_id)
         ON DELETE RESTRICT ON UPDATE CASCADE
     
 		-- FOREIGN KEY (receipt_number_id) REFERENCES  Сash_register_receipt(receipt_number) ON DELETE RESTRICT ON UPDATE CASCADE, 
@@ -291,8 +259,8 @@ CREATE TABLE Purchase_list (                                                    
     -- КНОПКА "СТВОРИТИ ЗАКУПІВЛЮ: "
     category_id ENUM('Шорти', 'Спідниця', 'Штани', 'Футболка', 'Светр','Блузка','Кофта','Сорочка','Піджак', 'Куртка', 'Плаття'),
     size_id ENUM ('XXS', 'XS', 'S', 'M', 'L', 'XL'),
-    color_id ENUM ('red', 'orange', 'yellow', 'green','blue', 'violet', 'grey', 'black'),
-    human_id ENUM ('Man', 'Woman'),
+    color_id ENUM ('Червоний', 'Оранжевий', 'Жовтий', 'Зелений','Голубий', 'Синій', 'Розовий', 'Сірий', 'Чорний', 'Білий', 'Коричневий'),
+    human_id ENUM ('Чоловічий', 'Жіночий'),
     amount_products int,
     price_id double,                                             -- ціна за одну позицію одного виду
     
@@ -315,7 +283,9 @@ CREATE TABLE Purchase_list (                                                    
 		-- FOREIGN KEY (price_id) REFERENCES Shop_storage(price) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
-CREATE TABLE Statistic (                                                                                    -- СТАТИСТИКА МАГАЗИНУ
+CREATE TABLE Statistic ( 
+	statistic_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    stat_month DATE NOT NULL DEFAULT '2026-11-01' UNIQUE,								-- СТАТИСТИКА МАГАЗИНУ
 	total_revenue double,                       -- Загальний виторг
     amount_receipts int,                        -- кількість чеків
     average_receipt double,                    
@@ -339,8 +309,8 @@ CREATE TABLE Promotions (                                                       
     promotion_name VARCHAR(100) NOT NULL,
     discount_type ENUM('Відсоток','Фіксована сума') NOT NULL,
     discount_value DECIMAL(10,2) NOT NULL,
-    category_id INT NULL,
-    -- supplier_id INT NULL,
+    category_id ENUM('Шорти', 'Спідниця', 'Штани', 'Футболка', 'Светр','Блузка','Кофта','Сорочка','Піджак', 'Куртка', 'Плаття') NULL,
+    supplier_id INT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     
@@ -352,13 +322,13 @@ CREATE TABLE Promotions (                                                       
     
 		CONSTRAINT chk_promo_dates  CHECK (end_date >= start_date),
     
-		CONSTRAINT fk_promo_category FOREIGN KEY (category_id) REFERENCES Shop_storage(category) ON DELETE RESTRICT ON UPDATE RESTRICT
+		-- CONSTRAINT fk_promo_category FOREIGN KEY (category_id) REFERENCES Shop_storage(category) ON DELETE RESTRICT ON UPDATE RESTRICT
         
-		-- CONSTRAINT fk_promo_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)  ON DELETE RESTRICT ON UPDATE RESTRICT
+		CONSTRAINT fk_promo_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(supplier_id)  ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE TABLE Store_hours (                   
-    weekday INT  NOT NULL PRIMARY KEY,
+    weekday INT NOT NULL PRIMARY KEY,
     open_time TIME NOT NULL,
     close_time TIME NOT NULL,
     
@@ -366,10 +336,19 @@ CREATE TABLE Store_hours (
 		CONSTRAINT chk_store_time    CHECK (close_time > open_time)
 );
 
-CREATE TABLE Work_shifts (                                                                          -- «Робочий графік працівників» (Е9)
+CREATE TABLE Expenses (                                                                                  -- ВИТРАТИ
+    expense_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    expense_date DATE NOT NULL,
+    description VARCHAR(100) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    
+		CONSTRAINT chk_expense_amount CHECK (amount >= 0)
+);
+
+CREATE TABLE Work_shifts (                                                                          -- Робочий графік 
     shift_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    worker_id INT  NOT NULL,
-    shift_date DATE NOT NULL,       -- немає рядка на дату = «ВИХІДНИЙ»
+    worker_id INT NOT NULL,
+    shift_date DATE NOT NULL,    
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     
@@ -382,10 +361,10 @@ CREATE TABLE Work_shifts (                                                      
         ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
-CREATE TABLE purchases (                                                                                     -- ЗАКУПІВЛІ
-    purchase_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,         -- «№»
-    created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,    -- «Дата»
-    supplier_id INT NOT NULL,                                    -- «Постачальник» + «Бренд»
+CREATE TABLE Purchases (                                                                                     -- ЗАКУПІВЛІ
+    purchase_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,         -- №
+    created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,    -- Дата
+    supplier_id INT NOT NULL,                                    -- Постачальни/Бренд
     -- created_by INT NOT NULL,
     status ENUM('Очікується','Отримано') NOT NULL DEFAULT 'Очікується',
     
@@ -397,23 +376,20 @@ CREATE TABLE purchase_items (                                                   
     purchase_item_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     purchase_id INT NOT NULL,
     barcode_id CHAR(13) NOT NULL,                                -- «Шукати товар по штрихкоду»
-    category_id INT NOT NULL,                                    -- «Назва товару»
-    human_id INT NOT NULL,
-    color_id INT NOT NULL,
-    size_id INT NOT NULL,
-    quantity INT NOT NULL,                                       -- «Кількість (шт.)»
-    price_id DECIMAL(10,2) NOT NULL,                             -- «Ціна за одиницю»
-    line_total DECIMAL(12,2) GENERATED ALWAYS AS (ROUND(quantity * unit_cost, 2)) STORED,  -- «Загальна ціна»
+    category_id ENUM('Шорти', 'Спідниця', 'Штани', 'Футболка', 'Светр','Блузка','Кофта','Сорочка','Піджак', 'Куртка', 'Плаття') NULL,                                    -- «Назва товару»
+    human ENUM ('Чоловічий', 'Жіночий'),
+    color ENUM ('Червоний', 'Оранжевий', 'Жовтий', 'Зелений','Голубий', 'Синій', 'Розовий', 'Сірий', 'Чорний', 'Білий', 'Коричневий'),
+    size ENUM ('XXS', 'XS', 'S', 'M', 'L', 'XL'),
+    quantity INT NOT NULL,                                      
+    price_id DECIMAL(10,2) NOT NULL,                        
+    line_total DECIMAL(12,2) GENERATED ALWAYS AS (ROUND(quantity * unit_cost, 2)) STORED,  -- Загальна ціна
     
 		CONSTRAINT chk_pi_qty  CHECK (quantity > 0),
         
 		CONSTRAINT chk_pi_price_id CHECK (price_id >= 0),
         
 		CONSTRAINT fk_pi_purchase FOREIGN KEY (purchase_id) REFERENCES purchases(purchase_id)  ON DELETE CASCADE  ON UPDATE CASCADE,
-		CONSTRAINT fk_pi_category FOREIGN KEY (category_id) REFERENCES Shop_storage(category) ON DELETE RESTRICT ON UPDATE CASCADE,
-		CONSTRAINT fk_pi_human   FOREIGN KEY (human_id)   REFERENCES Shop_storage(human)      ON DELETE RESTRICT ON UPDATE CASCADE,
-		CONSTRAINT fk_pi_color    FOREIGN KEY (color_id)    REFERENCES Shop_storage(color)        ON DELETE RESTRICT ON UPDATE CASCADE,
-		CONSTRAINT fk_pi_size     FOREIGN KEY (size_id)     REFERENCES Shop_storage(size)          ON DELETE RESTRICT ON UPDATE CASCADE
+		
 )
 
 insert into Shop_storage(barcode ,category, brand_name_id, human, color, size, amount, price ,cost_price, status, added_at ) values
@@ -431,6 +407,16 @@ insert into Shop_storage(barcode ,category, brand_name_id, human, color, size, a
     (6785674534587, 'Кофта', 'Massimo Dutti', 'Чоловічий', 'Сірий', 'L', 2, 1899.00, 'Продано'),
     (1321321432546, 'Светр', 'Bershka', 'Жіночий', 'Розовий', 'S', 3, 799.00, 'Продано'
 );
+
+INSERT INTO Suppliers (supplier_last_name, supplier_first_name, supplier_middle_name, brand_name, supplier_phone, supplier_gmail, country, supplier_start_work, supplier_salary) VALUES
+ ('Бондаренко','Олексій','Тарасович',     'Stradivarius', '+380987654321','oleksiy.bond@gmail.com',       'Іспанія',   '2025-09-21', 17000),
+ ('Ковальчук', 'Олена',  'Ігорівна',      'Nike',         '+380671234567','o.kovalchuk@nike-supply.com',  'В''єтнам',  '2025-07-07', 18000),
+ ('Шевченко',  'Андрій', 'Володимирович', 'Zara',         '+380934567890','a.shevchenko@inditex.ua',      'Португалія','2020-06-05', 17700),
+ ('Мельник',   'Ірина',  'Василівна',     'Bershka',      '+380683216549','i.melnyk@fashion-logistics.com','Туреччина','2021-08-04', 13000),
+ ('Ткаченко',  'Дмитро', 'Олександрович', 'Lacoste',      '+380951472583','d.tkachenko@lacoste.fr',       'Франція',   '2024-11-23', 20000),
+ ('Кравченко', 'Наталія','Миколаївна',    'Oysho',        '+380738529630','n.kravchenko@oysho-trade.com', 'Китай',     '2023-12-12', 19000),
+ ('Бойко',     'Сергій', 'Петрович',      'Massimo Dutti','+380976543210','s.boyko@dutti-group.com',      'Італія',    '2026-05-11', 22000),
+ ('Лисенко',   'Марія',  'Сергіївна',     'Puma',         '+380683216549','m.lysenko@puma-distrib.com',   'Бангладеш', '2024-08-31', 18000);
 
 
 INSERT INTO Cash_register (
